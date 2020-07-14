@@ -2,19 +2,23 @@ import * as Phaser from "phaser";
 
 import * as armColtImage from "../../assets/armColt.png";
 import * as bodyColtImage from "../../assets/bodyColt.png";
+import * as joystickHeadImage from "../../assets/joystickHead.png";
+import * as joystickBaseImage from "../../assets/joystickBase.png";
 
 import { Colt } from "../brawlers/colt";
 
 export class MainScene extends Phaser.Scene {
   public constructor() {
     super({
-      key: "WorldScene",
+      key: "MainScene",
     });
   }
 
   public preload(): void {
-    this.load.image("armColtImage", armColtImage.default);
-    this.load.image("bodyColtImage", bodyColtImage.default);
+    this.load.image("armColt", armColtImage.default);
+    this.load.image("bodyColt", bodyColtImage.default);
+    this.load.image("joystickHead", joystickHeadImage.default);
+    this.load.image("joystickBase", joystickBaseImage.default);
   }
 
   public create(): void {
@@ -30,6 +34,8 @@ export class MainScene extends Phaser.Scene {
     this.cameras.main.centerOn(0, 0);
 
     this.add.existing(new Colt(this, 0, 0));
+
+    this.scene.launch("UiScene");
   }
 
   /**

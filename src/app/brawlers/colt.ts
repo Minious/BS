@@ -7,20 +7,20 @@ export class Colt extends Phaser.GameObjects.Container {
     let rightArmImage: Phaser.GameObjects.Image = this.scene.add.image(
       0,
       0,
-      "armColtImage"
+      "armColt"
     );
     this.add(rightArmImage);
     let leftArmImage: Phaser.GameObjects.Image = this.scene.add.image(
       0,
       0,
-      "armColtImage"
+      "armColt"
     );
     leftArmImage.flipX = true;
     this.add(leftArmImage);
     let headArmImage: Phaser.GameObjects.Image = this.scene.add.image(
       0,
       0,
-      "bodyColtImage"
+      "bodyColt"
     );
     this.add(headArmImage);
 
