@@ -23,5 +23,23 @@ export class Colt extends Phaser.GameObjects.Container {
       "bodyColtImage"
     );
     this.add(headArmImage);
+
+    this.setScale(0.5, 0.5);
+
+    this.scene.input.on(
+      "pointermove",
+      (pointer: Phaser.Input.Pointer) => {
+        var angle =
+          Phaser.Math.RAD_TO_DEG *
+          Phaser.Math.Angle.Between(
+            this.x,
+            this.y,
+            pointer.worldX,
+            pointer.worldY
+          );
+        this.setAngle(angle - 90);
+      },
+      this
+    );
   }
 }
