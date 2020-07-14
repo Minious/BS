@@ -15,4 +15,4 @@ app.get("*", (req, res) => {
   res.sendFile(index_file_path);
 });
 
-app.listen(port);
+app.listen(port, '0.0.0.0');

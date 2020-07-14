@@ -14,8 +14,6 @@ export const run = (): void => {
     physics: {
       default: "arcade",
     },
-    // @ts-ignore
-    pixelArt: true,
     scene: scenes,
   };
 

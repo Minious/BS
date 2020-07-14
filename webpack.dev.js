@@ -11,6 +11,8 @@ module.exports = merge(common, {
   },
   devServer: {
     writeToDisk: true,
+    host: "0.0.0.0",
+    public: "localhost:8080",
   },
   devtool: "source-map",
 });
