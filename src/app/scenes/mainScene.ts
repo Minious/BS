@@ -1,16 +1,21 @@
 import * as Phaser from "phaser";
 
+import * as armColtImage from "../../assets/armColt.png";
+import * as bodyColtImage from "../../assets/bodyColt.png";
+
+import { Colt } from "../brawlers/colt";
+
 export class MainScene extends Phaser.Scene {
   public constructor() {
-    super(
-      {
-        key: "WorldScene",
-      }
-    );
+    super({
+      key: "WorldScene",
+    });
   }
 
-  // tslint:disable-next-line: no-empty
-  public preload(): void {}
+  public preload(): void {
+    this.load.image("armColtImage", armColtImage.default);
+    this.load.image("bodyColtImage", bodyColtImage.default);
+  }
 
   public create(): void {
     // Disables right click
@@ -23,6 +28,8 @@ export class MainScene extends Phaser.Scene {
      * at origin)
      */
     this.cameras.main.centerOn(0, 0);
+
+    this.add.existing(new Colt(this, 0, 0));
   }
 
   /**
