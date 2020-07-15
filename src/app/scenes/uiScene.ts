@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 
 import { Joystick } from "../joystick";
+import { MainScene } from "./mainScene";
 
 export class UiScene extends Phaser.Scene {
   private _moveJoystick: Joystick;
@@ -25,10 +26,31 @@ export class UiScene extends Phaser.Scene {
   public preload(): void {}
 
   public create(): void {
-    this._moveJoystick = new Joystick(this, 30);
+    const marginJoysticks: number = 100;
+    this._moveJoystick = new Joystick(
+      this,
+      30,
+      new Phaser.Math.Vector2(
+        marginJoysticks,
+        this.cameras.main.height - marginJoysticks
+      )
+    );
     this.add.existing(this._moveJoystick);
 
-    this._attackJoystick = new Joystick(this, 30);
+    this._attackJoystick = new Joystick(
+      this,
+      30,
+      new Phaser.Math.Vector2(
+        this.cameras.main.width - marginJoysticks,
+        this.cameras.main.height - marginJoysticks
+      ),
+      (joystick: Joystick) => {
+        const mainScene: MainScene = this.scene.manager.getScene(
+          "MainScene"
+        ) as MainScene;
+        mainScene.brawlerAttack(joystick.getMove());
+      }
+    );
     this.add.existing(this._attackJoystick);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer): void => {
@@ -37,7 +59,6 @@ export class UiScene extends Phaser.Scene {
         pointer.x < this.cameras.main.width / 2
       ) {
         this._moveJoystick.start(pointer);
-        console.log("move joystick");
       } else if (
         !this._attackJoystick.inUse &&
         pointer.x >= this.cameras.main.width / 2

@@ -17,10 +17,6 @@ export class Joystick extends Phaser.GameObjects.Container {
 
   // Maximum length between the base and the head of the joystick
   private maxLengthJoystick: number;
-  // The joystick head's position
-  private joystickHeadPos: Phaser.Math.Vector2;
-  // The joystick base's position
-  private joystickBasePos: Phaser.Math.Vector2;
   // The joystick's head game object Image
   private joystickHeadImage: Phaser.GameObjects.Image;
   // The joystick's base game object Image
@@ -28,6 +24,8 @@ export class Joystick extends Phaser.GameObjects.Container {
 
   private pointer: Phaser.Input.Pointer;
   private _inUse: boolean = false;
+  private callback: (joystick: Joystick) => void;
+  private initialPosition: Phaser.Math.Vector2;
 
   /**
    * Creates the Joystick object.
@@ -36,26 +34,41 @@ export class Joystick extends Phaser.GameObjects.Container {
    * @param {number} maxLengthJoystick - The maximum distance between the head
    * and the base of the joystick
    */
-  public constructor(scene: Phaser.Scene, maxLengthJoystick: number) {
+  public constructor(
+    scene: Phaser.Scene,
+    maxLengthJoystick: number,
+    initialPosition: Phaser.Math.Vector2,
+    callback?: (joystick: Joystick) => void
+  ) {
     super(scene, 0, 0);
 
-    this.joystickBasePos = new Phaser.Math.Vector2(50, 50);
-    this.joystickHeadPos = new Phaser.Math.Vector2(50, 50);
-
     this.maxLengthJoystick = maxLengthJoystick;
+    this.callback = callback;
 
     this.joystickBaseImage = this.scene.add.image(0, 0, "joystickBase");
-    this.joystickBaseImage.setScale(5, 5);
     this.joystickBaseImage.name = "joystickBase";
     this.add(this.joystickBaseImage);
 
     this.joystickHeadImage = this.scene.add.image(0, 0, "joystickHead");
-    this.joystickHeadImage.setScale(5, 5);
     this.joystickHeadImage.name = "joystickHead";
     this.joystickHeadImage.setInteractive();
     this.add(this.joystickHeadImage);
 
-    this.hide();
+    this.initialPosition = initialPosition;
+    this.resetTo(this.initialPosition);
+
+    this.scene.input.on(
+      "pointerup",
+      (pointerUp: Phaser.Input.Pointer): void => {
+        if (pointerUp === this.pointer) {
+          if (this.callback) {
+            this.callback(this);
+          }
+          this.stop();
+          this._inUse = false;
+        }
+      }
+    );
   }
 
   // Getter for _inUse
@@ -63,45 +76,16 @@ export class Joystick extends Phaser.GameObjects.Container {
     return this._inUse;
   }
 
-  /**
-   * Updates the position of the head of the joystick by giving the pointer's
-   * world position. Moves the base too if it gets too far from the head.
-   * @param pointerScreenPos - The position of the pointer in screen coordinates
-   */
-  private updatePosition(pointerScreenPos: Phaser.Math.Vector2): void {
-    this.joystickHeadPos = pointerScreenPos;
-
-    const currentLengthJoystick: number = this.joystickHeadPos.distance(
-      this.joystickBasePos
-    );
-
-    /**
-     * If the head (pointer) is too far from the base of the joystick, then
-     * moves the base towards the head until the distance reaches the
-     * maxLengthJoystick
-     */
-    if (currentLengthJoystick > this.maxLengthJoystick) {
-      this.joystickBasePos = new Phaser.Math.Vector2(this.joystickBasePos)
-        .subtract(this.joystickHeadPos)
-        .scale(this.maxLengthJoystick / currentLengthJoystick)
-        .add(this.joystickHeadPos);
-    }
-
-    // Updates the position of the joystick's head and base
-    this.joystickBaseImage.setPosition(
-      this.joystickBasePos.x,
-      this.joystickBasePos.y
-    );
-    this.joystickHeadImage.setPosition(
-      this.joystickHeadPos.x,
-      this.joystickHeadPos.y
-    );
-  }
-
-  public update() {
+  public update(): void {
     if (this.pointer) {
       this.updatePosition(this.pointer.position);
     }
+  }
+
+  public start(pointer: Phaser.Input.Pointer): void {
+    this.pointer = pointer;
+    this.resetTo(this.pointer.position);
+    this._inUse = true;
   }
 
   /**
@@ -110,8 +94,14 @@ export class Joystick extends Phaser.GameObjects.Container {
    * Joystick
    */
   public getMove(): Phaser.Math.Vector2 {
-    return new Phaser.Math.Vector2(this.joystickHeadPos).subtract(
-      this.joystickBasePos
+    return new Phaser.Math.Vector2(
+      this.joystickHeadImage.x,
+      this.joystickHeadImage.y
+    ).subtract(
+      new Phaser.Math.Vector2(
+        this.joystickBaseImage.x,
+        this.joystickBaseImage.y
+      )
     );
   }
 
@@ -121,8 +111,14 @@ export class Joystick extends Phaser.GameObjects.Container {
    * the joystick is moved.
    */
   public getRatio(): number {
-    const currentLengthJoystick: number = this.joystickHeadPos.distance(
-      this.joystickBasePos
+    const currentLengthJoystick: number = new Phaser.Math.Vector2(
+      this.joystickHeadImage.x,
+      this.joystickHeadImage.y
+    ).distance(
+      new Phaser.Math.Vector2(
+        this.joystickBaseImage.x,
+        this.joystickBaseImage.y
+      )
     );
     return Math.max(
       Math.min(currentLengthJoystick / this.maxLengthJoystick, 1),
@@ -135,42 +131,57 @@ export class Joystick extends Phaser.GameObjects.Container {
    * @param pointerScreenPos - The reset position
    */
   public resetTo(resetPos: Phaser.Math.Vector2): void {
-    this.joystickHeadPos = new Phaser.Math.Vector2(resetPos);
-    this.joystickBasePos = new Phaser.Math.Vector2(resetPos);
+    this.joystickBaseImage.setPosition(resetPos.x, resetPos.y);
+    this.joystickHeadImage.setPosition(resetPos.x, resetPos.y);
   }
 
   /**
-   * Hides the Joystick.
+   * Updates the position of the head of the joystick by giving the pointer's
+   * world position. Moves the base too if it gets too far from the head.
+   * @param pointerScreenPos - The position of the pointer in screen coordinates
    */
-  private hide(): void {
-    this.joystickBaseImage.visible = false;
-    this.joystickHeadImage.visible = false;
-  }
+  private updatePosition(pointerScreenPos: Phaser.Math.Vector2): void {
+    this.joystickHeadImage.setPosition(pointerScreenPos.x, pointerScreenPos.y);
 
-  /**
-   * Shows the Joystick.
-   */
-  private show(): void {
-    this.joystickBaseImage.visible = true;
-    this.joystickHeadImage.visible = true;
-  }
+    const currentLengthJoystick: number = new Phaser.Math.Vector2(
+      this.joystickHeadImage.x,
+      this.joystickHeadImage.y
+    ).distance(
+      new Phaser.Math.Vector2(
+        this.joystickBaseImage.x,
+        this.joystickBaseImage.y
+      )
+    );
 
-  public start(pointer: Phaser.Input.Pointer): void {
-    this.pointer = pointer;
-    this.resetTo(this.pointer.position);
-    this._inUse = true;
-    this.show();
-
-    this.scene.input.on("pointerup", (pointer: Phaser.Input.Pointer): void => {
-      if (pointer == this.pointer) {
-        this.stop();
-        this._inUse = false;
-      }
-    });
+    /**
+     * If the head (pointer) is too far from the base of the joystick, then
+     * moves the base towards the head until the distance reaches the
+     * maxLengthJoystick
+     */
+    if (currentLengthJoystick > this.maxLengthJoystick) {
+      const newBasePosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2(
+        this.joystickBaseImage.x,
+        this.joystickBaseImage.y
+      )
+        .subtract(
+          new Phaser.Math.Vector2(
+            this.joystickHeadImage.x,
+            this.joystickHeadImage.y
+          )
+        )
+        .scale(this.maxLengthJoystick / currentLengthJoystick)
+        .add(
+          new Phaser.Math.Vector2(
+            this.joystickHeadImage.x,
+            this.joystickHeadImage.y
+          )
+        );
+      this.joystickBaseImage.setPosition(newBasePosition.x, newBasePosition.y);
+    }
   }
 
   private stop(): void {
     this.pointer = undefined;
-    this.hide();
+    this.resetTo(this.initialPosition);
   }
 }

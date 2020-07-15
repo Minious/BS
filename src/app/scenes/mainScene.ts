@@ -64,4 +64,8 @@ export class MainScene extends Phaser.Scene {
       );
     }
   }
+
+  public brawlerAttack(direction: Phaser.Math.Vector2): void {
+    console.log("attack");
+  }
 }
