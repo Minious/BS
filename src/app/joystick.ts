@@ -49,7 +49,7 @@ export class Joystick extends Phaser.GameObjects.Container {
     this.joystickHeadImage.name = "joystickHead";
     this.add(this.joystickHeadImage);
 
-    // this.hide();
+    this.hide();
   }
 
   /**
@@ -118,8 +118,8 @@ export class Joystick extends Phaser.GameObjects.Container {
    * @param pointerScreenPos - The reset position
    */
   public resetTo(resetPos: Phaser.Math.Vector2): void {
-    this.joystickHeadPos = resetPos;
-    this.joystickBasePos = resetPos;
+    this.joystickHeadPos = new Phaser.Math.Vector2(resetPos);
+    this.joystickBasePos = new Phaser.Math.Vector2(resetPos);
   }
 
   /**

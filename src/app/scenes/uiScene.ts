@@ -21,6 +21,15 @@ export class UiScene extends Phaser.Scene {
   public create(): void {
     this._joystick = new Joystick(this, 30);
     this.add.existing(this._joystick);
+
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer): void => {
+      this.joystick.resetTo(pointer.position);
+      this.joystick.show();
+    });
+
+    this.input.on("pointerup", (): void => {
+      this.joystick.hide();
+    });
   }
 
   /**
@@ -31,11 +40,6 @@ export class UiScene extends Phaser.Scene {
    * a smoothed and capped value based on the FPS rate.
    */
   public update(time: number, delta: number): void {
-    const pointerScreenPos: Phaser.Math.Vector2 = new Phaser.Math.Vector2(
-      this.input.activePointer.x,
-      this.input.activePointer.y
-    );
-
-    this.joystick.updatePosition(pointerScreenPos);
+    this.joystick.updatePosition(this.input.activePointer.position);
   }
 }
