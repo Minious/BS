@@ -3,7 +3,7 @@ import * as Phaser from "phaser";
 import { Joystick } from "../joystick";
 
 export class UiScene extends Phaser.Scene {
-  private joystick: Joystick;
+  private _joystick: Joystick;
 
   public constructor() {
     super({
@@ -11,12 +11,16 @@ export class UiScene extends Phaser.Scene {
     });
   }
 
+  // Getter for _lootConfig
+  public get joystick(): Joystick {
+    return this._joystick;
+  }
+
   public preload(): void {}
 
   public create(): void {
-    this.joystick = new Joystick(this, 30);
-    this.add.existing(this.joystick);
-    console.log(100);
+    this._joystick = new Joystick(this, 30);
+    this.add.existing(this._joystick);
   }
 
   /**

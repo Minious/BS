@@ -1,8 +1,10 @@
 import * as Phaser from "phaser";
 
-export class Colt extends Phaser.GameObjects.Container {
+import { Brawler } from "./brawler";
+
+export class Colt extends Brawler {
   public constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y);
+    super(scene, x, y, 100);
 
     let rightArmImage: Phaser.GameObjects.Image = this.scene.add.image(
       0,
@@ -25,21 +27,5 @@ export class Colt extends Phaser.GameObjects.Container {
     this.add(headArmImage);
 
     this.setScale(0.5, 0.5);
-
-    this.scene.input.on(
-      "pointermove",
-      (pointer: Phaser.Input.Pointer) => {
-        var angle =
-          Phaser.Math.RAD_TO_DEG *
-          Phaser.Math.Angle.Between(
-            this.x,
-            this.y,
-            pointer.worldX,
-            pointer.worldY
-          );
-        this.setAngle(angle - 90);
-      },
-      this
-    );
   }
 }

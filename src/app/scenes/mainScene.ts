@@ -5,9 +5,13 @@ import * as bodyColtImage from "../../assets/bodyColt.png";
 import * as joystickHeadImage from "../../assets/joystickHead.png";
 import * as joystickBaseImage from "../../assets/joystickBase.png";
 
+import { Brawler } from "../brawlers/brawler";
 import { Colt } from "../brawlers/colt";
+import { UiScene } from "./uiScene";
 
 export class MainScene extends Phaser.Scene {
+  brawlers: Array<Brawler> = [];
+
   public constructor() {
     super({
       key: "MainScene",
@@ -33,7 +37,9 @@ export class MainScene extends Phaser.Scene {
      */
     this.cameras.main.centerOn(0, 0);
 
-    this.add.existing(new Colt(this, 0, 0));
+    const colt = new Colt(this, 0, 0);
+    this.brawlers.push(colt);
+    this.brawlers.forEach((brawler: Brawler) => this.add.existing(brawler));
 
     this.scene.launch("UiScene");
   }
@@ -47,6 +53,13 @@ export class MainScene extends Phaser.Scene {
    */
   // tslint:disable-next-line: no-empty
   public update(time: number, delta: number): void {
-    
+    const uiScene: UiScene = this.scene.manager.getScene("UiScene") as UiScene;
+    this.brawlers.forEach((brawler: Brawler) =>
+      brawler.move(
+        uiScene.joystick.getMove(),
+        uiScene.joystick.getRatio(),
+        1 / 60
+      )
+    );
   }
 }

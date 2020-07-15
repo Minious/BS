@@ -88,6 +88,32 @@ export class Joystick extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Returns a Vector2 which goes from the base to the head of the Joystick
+   * @returns {Vector2} - The Vector2 going from the base to the head of the
+   * Joystick
+   */
+  public getMove(): Phaser.Math.Vector2 {
+    return new Phaser.Math.Vector2(this.joystickHeadPos).subtract(
+      this.joystickBasePos
+    );
+  }
+
+  /**
+   * Returns the ratio between the current length of the joystick (base to head)
+   * to its maximum length. Gives a number between 0 and 1 representing how much
+   * the joystick is moved.
+   */
+  public getRatio(): number {
+    const currentLengthJoystick: number = this.joystickHeadPos.distance(
+      this.joystickBasePos
+    );
+    return Math.max(
+      Math.min(currentLengthJoystick / this.maxLengthJoystick, 1),
+      0
+    );
+  }
+
+  /**
    * Resets base and head's position to the same reset position.
    * @param pointerScreenPos - The reset position
    */
