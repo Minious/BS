@@ -26,6 +26,9 @@ export class Joystick extends Phaser.GameObjects.Container {
   // The joystick's base game object Image
   private joystickBaseImage: Phaser.GameObjects.Image;
 
+  private pointer: Phaser.Input.Pointer;
+  private _inUse: boolean = false;
+
   /**
    * Creates the Joystick object.
    * @param {Scene} scene - The Scene this Joystick belongs to
@@ -42,14 +45,22 @@ export class Joystick extends Phaser.GameObjects.Container {
     this.maxLengthJoystick = maxLengthJoystick;
 
     this.joystickBaseImage = this.scene.add.image(0, 0, "joystickBase");
+    this.joystickBaseImage.setScale(5, 5);
     this.joystickBaseImage.name = "joystickBase";
     this.add(this.joystickBaseImage);
 
     this.joystickHeadImage = this.scene.add.image(0, 0, "joystickHead");
+    this.joystickHeadImage.setScale(5, 5);
     this.joystickHeadImage.name = "joystickHead";
+    this.joystickHeadImage.setInteractive();
     this.add(this.joystickHeadImage);
 
     this.hide();
+  }
+
+  // Getter for _inUse
+  public get inUse(): boolean {
+    return this._inUse;
   }
 
   /**
@@ -57,7 +68,7 @@ export class Joystick extends Phaser.GameObjects.Container {
    * world position. Moves the base too if it gets too far from the head.
    * @param pointerScreenPos - The position of the pointer in screen coordinates
    */
-  public updatePosition(pointerScreenPos: Phaser.Math.Vector2): void {
+  private updatePosition(pointerScreenPos: Phaser.Math.Vector2): void {
     this.joystickHeadPos = pointerScreenPos;
 
     const currentLengthJoystick: number = this.joystickHeadPos.distance(
@@ -85,6 +96,12 @@ export class Joystick extends Phaser.GameObjects.Container {
       this.joystickHeadPos.x,
       this.joystickHeadPos.y
     );
+  }
+
+  public update() {
+    if (this.pointer) {
+      this.updatePosition(this.pointer.position);
+    }
   }
 
   /**
@@ -125,7 +142,7 @@ export class Joystick extends Phaser.GameObjects.Container {
   /**
    * Hides the Joystick.
    */
-  public hide(): void {
+  private hide(): void {
     this.joystickBaseImage.visible = false;
     this.joystickHeadImage.visible = false;
   }
@@ -133,8 +150,27 @@ export class Joystick extends Phaser.GameObjects.Container {
   /**
    * Shows the Joystick.
    */
-  public show(): void {
+  private show(): void {
     this.joystickBaseImage.visible = true;
     this.joystickHeadImage.visible = true;
+  }
+
+  public start(pointer: Phaser.Input.Pointer): void {
+    this.pointer = pointer;
+    this.resetTo(this.pointer.position);
+    this._inUse = true;
+    this.show();
+
+    this.scene.input.on("pointerup", (pointer: Phaser.Input.Pointer): void => {
+      if (pointer == this.pointer) {
+        this.stop();
+        this._inUse = false;
+      }
+    });
+  }
+
+  private stop(): void {
+    this.pointer = undefined;
+    this.hide();
   }
 }

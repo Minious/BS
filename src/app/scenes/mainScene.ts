@@ -53,14 +53,12 @@ export class MainScene extends Phaser.Scene {
    */
   // tslint:disable-next-line: no-empty
   public update(time: number, delta: number): void {
-    if (this.input.activePointer.primaryDown) {
-      const uiScene: UiScene = this.scene.manager.getScene(
-        "UiScene"
-      ) as UiScene;
+    const uiScene: UiScene = this.scene.manager.getScene("UiScene") as UiScene;
+    if (uiScene.moveJoystick.inUse) {
       this.brawlers.forEach((brawler: Brawler) =>
         brawler.move(
-          uiScene.joystick.getMove(),
-          uiScene.joystick.getRatio(),
+          uiScene.moveJoystick.getMove(),
+          uiScene.moveJoystick.getRatio(),
           1 / 60
         )
       );

@@ -3,7 +3,8 @@ import * as Phaser from "phaser";
 import { Joystick } from "../joystick";
 
 export class UiScene extends Phaser.Scene {
-  private _joystick: Joystick;
+  private _moveJoystick: Joystick;
+  private _attackJoystick: Joystick;
 
   public constructor() {
     super({
@@ -11,24 +12,38 @@ export class UiScene extends Phaser.Scene {
     });
   }
 
-  // Getter for _lootConfig
-  public get joystick(): Joystick {
-    return this._joystick;
+  // Getter for _moveJoystick
+  public get moveJoystick(): Joystick {
+    return this._moveJoystick;
+  }
+
+  // Getter for _attackJoystick
+  public get attackJoystick(): Joystick {
+    return this._attackJoystick;
   }
 
   public preload(): void {}
 
   public create(): void {
-    this._joystick = new Joystick(this, 30);
-    this.add.existing(this._joystick);
+    this._moveJoystick = new Joystick(this, 30);
+    this.add.existing(this._moveJoystick);
+
+    this._attackJoystick = new Joystick(this, 30);
+    this.add.existing(this._attackJoystick);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer): void => {
-      this.joystick.resetTo(pointer.position);
-      this.joystick.show();
-    });
-
-    this.input.on("pointerup", (): void => {
-      this.joystick.hide();
+      if (
+        !this._moveJoystick.inUse &&
+        pointer.x < this.cameras.main.width / 2
+      ) {
+        this._moveJoystick.start(pointer);
+        console.log("move joystick");
+      } else if (
+        !this._attackJoystick.inUse &&
+        pointer.x >= this.cameras.main.width / 2
+      ) {
+        this._attackJoystick.start(pointer);
+      }
     });
   }
 
@@ -40,6 +55,7 @@ export class UiScene extends Phaser.Scene {
    * a smoothed and capped value based on the FPS rate.
    */
   public update(time: number, delta: number): void {
-    this.joystick.updatePosition(this.input.activePointer.position);
+    this._moveJoystick.update();
+    this._attackJoystick.update();
   }
 }

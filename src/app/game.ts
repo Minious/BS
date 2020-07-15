@@ -16,6 +16,9 @@ export const run = (): void => {
       default: "arcade",
     },
     scene: scenes,
+    input: {
+      activePointers: 3,
+    },
   };
 
   // Creates the Phaser canvas and start the game
